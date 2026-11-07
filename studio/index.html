@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sfx-tool Studio</title>
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="icon.svg" alt="" width="22" height="22"><b>sfx-tool</b><span>Studio</span></div>
+  <div class="folder" id="folder" title="Sound folder"></div>
+  <div class="top-controls">
+    <label class="toggle" title="Play the sound each time you let go of a slider"><input type="checkbox" id="auto-play" checked><span>Play on change</span></label>
+    <label class="vol" title="Preview volume only. Files are not changed."><span>Preview vol</span><input type="range" id="volume" min="0" max="4" step="0.05" value="1.6"></label>
+    <span class="save-state" id="save-state" aria-live="polite"></span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-head">
+      <input type="search" id="search" placeholder="Search sounds" aria-label="Search sounds">
+      <button class="btn" id="new-btn" title="New sound (N)">New sound</button>
+    </div>
+    <nav id="list" class="list" aria-label="Sounds"></nav>
+  </aside>
+
+  <main class="main">
+    <section class="editor" id="editor">
+      <div class="title-row">
+        <div class="title-block">
+          <div class="title-line"><h1 id="name"></h1><span class="chip" id="family"></span></div>
+          <input id="desc" class="desc" placeholder="Describe what this sound is for" aria-label="Description">
+        </div>
+        <div class="actions">
+          <button class="btn primary play" id="play" title="Play (Space)"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.2l8 4.8-8 4.8z"/></svg>Play</button>
+          <button class="btn" id="vary" title="Variations (V)">Try variations</button>
+          <button class="btn" id="dup" title="Duplicate (D)">Duplicate</button>
+          <button class="btn" id="revert" title="Undo changes since you opened this sound">Revert changes</button>
+          <button class="btn" id="download" title="Download WAV">Download WAV</button>
+          <button class="btn danger" id="delete" title="Delete">Delete sound</button>
+        </div>
+      </div>
+
+      <div class="variations" id="variations" hidden>
+        <div class="var-head"><b>Variations</b><span>Click to hear. Keep one to replace the current settings, or save it as a new sound.</span>
+          <button class="btn small" id="var-more">Shuffle again</button><button class="btn small" id="var-close">Close</button></div>
+        <div class="var-grid" id="var-grid"></div>
+      </div>
+
+      <div class="scopes">
+        <figure class="scope"><figcaption>Waveform <span id="dur"></span></figcaption><canvas id="wave"></canvas></figure>
+        <figure class="scope"><figcaption>Spectrum <span>40 Hz – 10 kHz</span></figcaption><canvas id="spec"></canvas></figure>
+      </div>
+      <div class="badges" id="badges"></div>
+
+      <div class="params" id="params"></div>
+    </section>
+
+    <section class="bench">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="type">Type to test</button>
+        <button role="tab" aria-selected="false" data-tab="track">Track</button>
+      </div>
+      <div class="tab-panel" data-panel="type">
+        <div class="bench-row">
+          <label>Sound <select id="type-sound"></select></label>
+          <span class="hint">Each key plays a fresh take with slight pitch and level drift. Return plays a line pop.</span>
+        </div>
+        <textarea id="pad" spellcheck="false" aria-label="Type here to hear the sound">npx sfx-tool studio</textarea>
+      </div>
+      <div class="tab-panel" data-panel="track" hidden>
+        <div class="bench-row wrap">
+          <label>Sound <select id="track-sound"></select></label>
+          <label>Speed <input type="range" id="cps" min="4" max="40" step="1" value="18"><output id="cps-out">18</output>/s</label>
+          <label>Per <select id="per"><option value="char">character</option><option value="word">word</option></select></label>
+          <label class="toggle"><input type="checkbox" id="chime" checked><span>End chime</span></label>
+          <button class="btn play" id="track-play"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.2l8 4.8-8 4.8z"/></svg>Play track</button>
+          <button class="btn" id="track-save" title="Save into the sound folder's exports/">Save to exports</button>
+          <button class="btn" id="track-download">Download WAV</button>
+        </div>
+        <div class="track-view">
+          <pre id="track-screen" class="track-screen"></pre>
+          <canvas id="track-wave"></canvas>
+        </div>
+        <textarea id="track-text" spellcheck="false" aria-label="Text to type">const tools = await index.search("gif");
+console.log(tools.length);</textarea>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="new-dialog">
+  <form method="dialog" id="new-form">
+    <h2>New sound</h2>
+    <label>Name <input id="new-name" required pattern="[A-Za-z0-9][A-Za-z0-9_\-]{0,63}" placeholder="soft_knock"></label>
+    <label>Start from <select id="new-from"></select></label>
+    <p class="err" id="new-err"></p>
+    <div class="dialog-actions"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" value="ok">Create</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
