@@ -1,7 +1,7 @@
 {
   "name": "sfx-tool",
   "version": "0.1.0",
-  "description": "Subtle typing and UI sound effects: a local studio to preview and shape them, a CLI to render tracks, and an agent skill.",
+  "description": "A sound effects workspace for AI agents: your agent makes the sounds, you hear and shape them in a local Studio, then export WAVs or typing tracks.",
   "type": "module",
   "bin": {
     "sfx-tool": "bin/sfx-tool.js"
@@ -24,11 +24,12 @@
   "keywords": [
     "sound-effects",
     "sfx",
-    "typing-sounds",
+    "ai-agents",
+    "agent-skill",
     "audio",
+    "typing-sounds",
     "video",
     "hyperframes",
-    "remotion",
-    "agent-skill"
+    "remotion"
   ]
 }
