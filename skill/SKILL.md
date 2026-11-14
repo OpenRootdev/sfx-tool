@@ -78,7 +78,14 @@ Take timestamps from the animation itself (the same `t` the typewriter uses), as
 - **Remotion:** `<Audio src={staticFile('typing.wav')} />`, or `<Sequence from={42}><Audio src={staticFile('sfx/wav/line_01.wav')} /></Sequence>` for one hit. Build times from `startFrame + i * framesPerChar` and pass `--fps`.
 - **HTML → frames → MP4:** `ffmpeg -i demo.mp4 -i typing.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out.mp4`. With music: `-filter_complex "[1:a][2:a]amix=inputs=2:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11[a]"`. GIFs have no sound.
 
-Level guide: −30 LUFS reads as texture under a −16 LUFS music bed. Without music use `--lufs -26`. Under a voice, use the felt or soft families.
+For a full soundtrack (music, voice, several SFX, filters, ducking, one finished mix) write a plan and run
+`sfx-tool mix plan.json -o mix.wav`, and use `sfx-tool analyse music.mp3` for tempo, beats and key. For a video
+whose picture is already finished, or a reference video whose sound the user likes, `sfx-tool spot video.mp4`
+lists its cuts, moves and holds, what its soundtrack does and how the two line up (needs ffmpeg). When to use
+which move, and the format, are in the **sound-design** skill (`skills/sound-design/` in the repo).
+Tonal sounds take note names: `--set pitch=E5` tunes a chime to the music's key.
+
+Level guide: −30 LUFS reads as texture under a −16 LUFS music bed. Without music use `--lufs -26`. Under a voice, the softer families (felt, soft pops) stay out of the way of speech.
 
 ## Model reference
 

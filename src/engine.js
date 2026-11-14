@@ -284,9 +284,13 @@ function iir(x, b, a) {
   return y;
 }
 /** Integrated loudness of channels[] (each a Float array at 48 kHz). */
+/** BS.1770 K-weighting at 48 kHz (shelf + high-pass). */
+export function kWeight(c) {
+  return iir(iir(c, [1.53512485958697, -2.69169618940638, 1.19839281085285], [1, -1.69065929318241, 0.73248077421585]),
+    [1, -2, 1], [1, -1.99004745483398, 0.99007225036621]);
+}
 export function lufs(channels) {
-  const kw = channels.map((c) => iir(iir(c, [1.53512485958697, -2.69169618940638, 1.19839281085285], [1, -1.69065929318241, 0.73248077421585]),
-    [1, -2, 1], [1, -1.99004745483398, 0.99007225036621]));
+  const kw = channels.map(kWeight);
   const blk = Math.floor(0.4 * SR), hop = Math.floor(0.1 * SR), n = Math.max(kw[0].length, blk);
   const ms = [];
   for (let s = 0; s + blk <= n; s += hop) {

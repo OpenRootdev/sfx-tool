@@ -1,7 +1,7 @@
 {
   "name": "sfx-tool",
-  "version": "0.1.0",
-  "description": "A sound effects workspace for AI agents: your agent makes the sounds, you hear and shape them in a local Studio, then export WAVs or typing tracks.",
+  "version": "0.2.0",
+  "description": "A sound effects workspace for AI agents: your agent makes the sounds, you hear and shape them in a local Studio, then export WAVs, typing tracks or a whole mixed soundtrack.",
   "type": "module",
   "bin": {
     "sfx-tool": "bin/sfx-tool.js"
@@ -10,7 +10,8 @@
     "bin",
     "src",
     "studio",
-    "skill"
+    "skill",
+    "skills"
   ],
   "engines": {
     "node": ">=18"
@@ -30,6 +31,8 @@
     "typing-sounds",
     "video",
     "hyperframes",
-    "remotion"
+    "remotion",
+    "sound-design",
+    "mixing"
   ]
 }

@@ -31,11 +31,12 @@ Your agent writes each sound as a small recipe file, and the Studio plays it the
 - Describe a sound ("softer", "more wooden", "like a real keyboard") and your agent builds it; you never write audio code.
 - Every change is live: waveform, spectrum and loudness checks update as you or the agent edit.
 - Made on your computer, with no account, API key or credit needed. It starts with 34 example sounds (key taps, knocks, pops, chimes) to build from.
+- Beyond single sounds, a second skill teaches your agent sound design for whole videos: music, timing, silence and the final mix. It can also study a finished video, or one whose sound you like, and score yours to match.
 
 ## Get started
 
 1. Install <a href="https://nodejs.org">Node.js</a> 18 or newer.
-2. Copy the <code>skill/</code> folder into your agent's skills folder (for Claude Code: <code>~/.claude/skills/sfx-tool</code>).
+2. Copy the <code>skill/</code> folder into your agent's skills folder (for Claude Code: <code>~/.claude/skills/sfx-tool</code>). For whole soundtracks, copy <code>skills/sound-design/</code> there too.
 3. Open a terminal in your project's folder and run the command below. It creates an <code>sfx/</code> folder and opens the Studio in your browser.
 4. Ask your agent in plain words, for example <i>"Make a soft, wooden click for each typed letter, and a gentle chime when the line is done."</i> The new sounds appear in the Studio, ready to tweak.
 
@@ -52,8 +53,9 @@ npx github:OpenRootdev/sfx-tool studio --open
 ## What's inside
 
 - [`skill/SKILL.md`](skill/SKILL.md) · How your agent turns a description into a sound, and how it works with you in the Studio.
+- [`skills/sound-design/`](skills/sound-design/) · Sound design for whole videos: what makes sound feel professional, and how to get there in each kind of video.
 - [`studio/`](studio/) · The page where you hear and shape the sounds.
-- [`bin/sfx-tool.js`](bin/sfx-tool.js) · The command your agent (or you) runs: make sounds, variations and typing tracks.
+- [`bin/sfx-tool.js`](bin/sfx-tool.js) · The command your agent (or you) runs: make sounds, variations and typing tracks, mix a soundtrack, read a song's tempo and key, or study a video.
 - [`src/`](src/) · The sound models and the example sounds.
 
 <sub>Preview media lives on the <a href="https://github.com/OpenRootdev/sfx-tool/tree/assets"><code>assets</code></a> branch and translations on <a href="https://github.com/OpenRootdev/sfx-tool/tree/translations"><code>translations</code></a>, so <code>main</code> holds only the tool.</sub>

@@ -1,7 +1,7 @@
 // Listen-free checks: clicks, clipping, harshness, loudness, brightness.
 import { lufs } from "./engine.js";
 
-function fftPower(x) {
+export function fftPower(x) {
   let n = 1; while (n < x.length) n <<= 1;
   const re = new Float64Array(n), im = new Float64Array(n);
   for (let i = 0; i < x.length; i++) re[i] = x[i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / Math.max(x.length - 1, 1)));

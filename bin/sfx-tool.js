@@ -6,6 +6,7 @@ import { FAMILIES, MODELS, normalize, renderRecipe } from "../src/engine.js";
 import { encodeWav, decodeWav } from "../src/wav.js";
 import { analyse } from "../src/checks.js";
 import { renderTrack, textEvents, parseTimes } from "../src/track.js";
+import { noteHz } from "../src/analyse.js";
 import { initProject, loadSounds, listRecipes, writeRecipe, writeWav, compact, NAME_RE } from "../src/project.js";
 
 const HELP = `sfx-tool: subtle typing and UI sounds
@@ -31,9 +32,21 @@ const HELP = `sfx-tool: subtle typing and UI sounds
       --min-gap-ms 40 --spread 0.2 --seed 1 --dir sfx --events-out events.json
   sfx-tool check <file.wav|dir ...>               clicks, clipping, harshness, loudness (exit 1 on problems)
   sfx-tool params [model|family]                 list the settings a sound type has, with ranges
+
+Sound design (see skills/sound-design):
+  sfx-tool mix <plan.json> -o mix.wav [--stems-out dir] [--report report.json] [--dir sfx]
+                                                 render a sound plan: clips, gain/filter automation, ducking,
+                                                 reverb, swells, loudness-matched master (default -14 LUFS)
+  sfx-tool analyse <music file> [--fps 30] [--beats-out beats.json]
+                                                 tempo, beat grid, key, notes that fit, loudness, energy per second
+  sfx-tool spot <video> [--report spot.json] [--events-out events.json] [--sheet sheet.png] [--fps 30] [--json]
+                                                 a finished or reference video: cuts, moves and holds in the picture;
+                                                 its soundtrack's bands, breaks, entries, tempo, groove and key;
+                                                 how the two line up (needs ffmpeg and ffprobe)
+  Note names work anywhere a pitch is set: --set pitch=E5
 `;
 
-const FLAGS = new Set(["end-chime", "force", "open", "help"]);
+const FLAGS = new Set(["end-chime", "force", "open", "help", "json"]);
 function parse(argv) {
   const pos = [], opt = {};
   for (let i = 0; i < argv.length; i++) {
@@ -51,7 +64,8 @@ function parse(argv) {
 const num = (v, d) => (v === undefined || v === true ? d : Number(v));
 const kv = (list) => Object.fromEntries(list.map((s) => {
   const [k, v] = s.split("="); if (v === undefined) throw new Error(`expected key=value, got "${s}"`);
-  return [k, isNaN(Number(v)) ? v : Number(v)];
+  const hz = noteHz(v); // note names (E5, F#4, Bb3) become Hz, so tonal sounds can be tuned to the music's key
+  return [k, hz ? +hz.toFixed(2) : isNaN(Number(v)) ? v : Number(v)];
 }));
 function checkKeys(recipe, params) {
   const known = new Set(MODELS[normalize(recipe).model].params.map((p) => p.key));
@@ -186,6 +200,58 @@ async function main() {
       console.log(path.basename(f, ".wav").slice(0, 17).padEnd(18) + fmt(m));
     }
     process.exitCode = bad ? 1 : 0;
+    return;
+  }
+
+  if (cmd === "mix") {
+    if (!pos[0]) throw new Error("give a plan: sfx-tool mix plan.json -o mix.wav");
+    if (!opt.out) throw new Error("give an output file with -o mix.wav");
+    const { renderMix } = await import("../src/mix.js");
+    const planPath = path.resolve(pos[0]), plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
+    const sfxDir = path.resolve(path.dirname(planPath), opt.dir || plan.sfx || "sfx");
+    const sounds = loadSounds(sfxDir); // falls back to the built-in pack when the folder does not exist
+    const { channels, tracks, report } = renderMix(plan, { base: path.dirname(planPath), sounds, sfxDir });
+    fs.mkdirSync(path.dirname(path.resolve(opt.out)), { recursive: true });
+    fs.writeFileSync(opt.out, encodeWav(channels));
+    if (opt["stems-out"]) {
+      fs.mkdirSync(opt["stems-out"], { recursive: true });
+      for (const [name, ch] of Object.entries(tracks)) fs.writeFileSync(path.join(opt["stems-out"], `${name}.wav`), encodeWav(ch));
+    }
+    if (opt.report) fs.writeFileSync(opt.report, JSON.stringify(report, null, 1));
+    console.log(`wrote ${opt.out}: ${report.duration} s, ${report.lufs} LUFS (target ${report.target}), peak ${report.peakDb} dBFS (true peak ${report.truePeakDb} dBTP), limiter ${report.limiterDb} dB`);
+    for (const [n, t] of Object.entries(report.tracks)) console.log(`  ${n.padEnd(14)} ${String(t.role).padEnd(9)} ${t.lufs == null ? "silent" : t.lufs + " LUFS"}  ${t.clips} clips`);
+    for (const d of report.ducking) console.log(`  ducked ${d.track} under ${d.under.join("+")} for ${d.seconds} s`);
+    for (const w of report.warnings) console.log(`  ! ${w}`);
+    return;
+  }
+
+  if (cmd === "analyse" || cmd === "analyze") {
+    if (!pos[0]) throw new Error("give a music file: sfx-tool analyse music.mp3");
+    const { loadAudio } = await import("../src/audio.js");
+    const { analyseMusic } = await import("../src/analyse.js");
+    const a = analyseMusic(loadAudio(path.resolve(pos[0])), { fps: num(opt.fps, 30) });
+    if (opt["beats-out"]) fs.writeFileSync(opt["beats-out"], JSON.stringify(a.beats));
+    if (opt.json) return console.log(JSON.stringify(a, null, 1));
+    console.log(`${path.basename(pos[0])}: ${a.duration} s, ${a.lufs} LUFS`);
+    if (a.tempo) console.log(`  tempo  ${a.tempo.bpm} BPM (confidence ${a.tempo.confidence}; half or double is possible), first beat ${a.tempo.firstBeat} s, ${a.tempo.framesPerBeat} frames per beat at ${num(opt.fps, 30)} fps`);
+    console.log(`  key    ${a.key} (margin ${a.keyConfidence} over ${a.runnerUp})  scale ${a.scale.join(" ")}`);
+    console.log(`  notes for tonal SFX: ${a.sfxNotes.map((n) => `${n.note} (${n.hz.join(" / ")} Hz)`).join(", ")}`);
+    console.log(`  energy dBFS per second: ${a.energy.join(" ")}`);
+    return;
+  }
+
+  if (cmd === "spot") {
+    if (!pos[0]) throw new Error("give a video: sfx-tool spot video.mp4");
+    const { spot, formatSpot, events, contactSheet } = await import("../src/spot.js");
+    const s = spot(path.resolve(pos[0]), { fps: opt.fps === undefined ? undefined : num(opt.fps, 30) });
+    s.file = pos[0];
+    if (opt.report) fs.writeFileSync(opt.report, JSON.stringify(s, null, 1));
+    if (opt["events-out"]) fs.writeFileSync(opt["events-out"], JSON.stringify(events(s), null, 1));
+    let sheet = null;
+    if (opt.sheet) sheet = contactSheet(path.resolve(pos[0]), path.resolve(opt.sheet), s.duration);
+    if (opt.json) return console.log(JSON.stringify(s, null, 1));
+    console.log(formatSpot(s));
+    if (sheet) console.log(`contact sheet: ${opt.sheet}, one frame every ${sheet.step} s${sheet.labelled ? "" : " (no time labels: this ffmpeg has no drawtext)"}`);
     return;
   }
 
