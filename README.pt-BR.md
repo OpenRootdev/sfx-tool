@@ -31,11 +31,12 @@ Seu agente escreve cada som como um pequeno arquivo de receita, e o Studio toca 
 - Descreva um som ("mais suave", "mais amadeirado", "como um teclado de verdade") e seu agente o cria; você nunca escreve código de áudio.
 - Tudo é ao vivo: forma de onda, espectro e checagem de volume se atualizam quando você ou o agente editam.
 - Feito no seu computador, sem conta, chave de API ou créditos. Vem com 34 sons de exemplo (teclas, batidas, bolhas, sininhos) para começar.
+- Além de sons avulsos, uma segunda skill ensina ao seu agente sound design para vídeos inteiros: música, timing, silêncio e a mixagem final. Ela também pode estudar um vídeo pronto, ou um cujo som você curte, e sonorizar o seu no mesmo nível.
 
 ## Começar
 
 1. Instale o <a href="https://nodejs.org">Node.js</a> 18 ou mais recente.
-2. Copie a pasta <code>skill/</code> para a pasta de skills do seu agente (no Claude Code: <code>~/.claude/skills/sfx-tool</code>).
+2. Copie a pasta <code>skill/</code> para a pasta de skills do seu agente (no Claude Code: <code>~/.claude/skills/sfx-tool</code>). Para trilhas sonoras completas, copie também <code>skills/sound-design/</code> para lá.
 3. Abra um terminal na pasta do seu projeto e rode o comando abaixo. Ele cria uma pasta <code>sfx/</code> e abre o Studio no navegador.
 4. Peça ao seu agente com suas palavras, por exemplo <i>"Faça um clique suave de madeira para cada letra digitada e um sininho leve quando a linha terminar."</i> Os sons novos aparecem no Studio, prontos para ajustar.
 
@@ -52,8 +53,9 @@ npx github:OpenRootdev/sfx-tool studio --open
 ## O que vem dentro
 
 - [`skill/SKILL.md`](https://github.com/OpenRootdev/sfx-tool/blob/main/skill/SKILL.md) · Como seu agente transforma uma descrição em som e trabalha com você no Studio.
+- [`skills/sound-design/`](https://github.com/OpenRootdev/sfx-tool/blob/main/skills/sound-design/) · Sound design para vídeos inteiros: o que faz o som parecer profissional e como chegar lá em cada tipo de vídeo.
 - [`studio/`](https://github.com/OpenRootdev/sfx-tool/blob/main/studio/) · A página onde você ouve e ajusta os sons.
-- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · O comando que seu agente (ou você) roda: cria sons, variações e trilhas de digitação.
+- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · O comando que seu agente (ou você) roda: cria sons, variações e trilhas de digitação, mixa uma trilha sonora, lê o andamento e o tom de uma música ou estuda um vídeo.
 - [`src/`](https://github.com/OpenRootdev/sfx-tool/blob/main/src/) · Os modelos de som e os sons de exemplo.
 
 <sub>As imagens de prévia ficam no branch <a href="https://github.com/OpenRootdev/sfx-tool/tree/assets"><code>assets</code></a> e as traduções em <a href="https://github.com/OpenRootdev/sfx-tool/tree/translations"><code>translations</code></a>, então o <code>main</code> tem só a ferramenta.</sub>

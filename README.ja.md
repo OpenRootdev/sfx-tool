@@ -31,11 +31,12 @@
 - 「もっと柔らかく」「もっと木の感じ」「本物のキーボードみたいに」と伝えるだけで、エージェントが音を作ります。音声のコードを書く必要はありません。
 - すべてリアルタイム。あなたやエージェントが編集すると、波形・スペクトル・音量チェックがすぐ更新されます。
 - 音は自分のパソコンで作られ、アカウントも API キーもクレジット表記も不要。たたき台として34種類のサンプル音（キー音、ノック、ポップ、チャイム）が付いています。
+- 単体の音だけでなく、もう一つのスキルが動画全体のサウンドデザイン（音楽、タイミング、無音、最終ミックス）をエージェントに教えます。完成した動画や、音が気に入った動画を分析して、あなたの動画に合う音を付けることもできます。
 
 ## はじめかた
 
 1. <a href="https://nodejs.org">Node.js</a> 18 以降をインストールします。
-2. <code>skill/</code> フォルダーをエージェントのスキルフォルダー（Claude Code なら <code>~/.claude/skills/sfx-tool</code>）にコピーします。
+2. <code>skill/</code> フォルダーをエージェントのスキルフォルダー（Claude Code なら <code>~/.claude/skills/sfx-tool</code>）にコピーします。サウンドトラック全体を作るなら <code>skills/sound-design/</code> も同じ場所にコピーします。
 3. プロジェクトのフォルダーでターミナルを開き、下のコマンドを実行します。<code>sfx/</code> フォルダーが作られ、ブラウザで Studio が開きます。
 4. エージェントにふつうの言葉で頼みます。例：<i>「1文字打つごとに柔らかい木のクリック音を、行が終わったら控えめなチャイムを付けて」</i> 新しい音が Studio に現れ、すぐに調整できます。
 
@@ -52,8 +53,9 @@ npx github:OpenRootdev/sfx-tool studio --open
 ## 中身
 
 - [`skill/SKILL.md`](https://github.com/OpenRootdev/sfx-tool/blob/main/skill/SKILL.md) · エージェントが説明から音を作り、Studio であなたと一緒に作業するための手順書。
+- [`skills/sound-design/`](https://github.com/OpenRootdev/sfx-tool/blob/main/skills/sound-design/) · 動画全体のサウンドデザイン。プロらしい音の条件と、動画の種類ごとのそこへの近づき方。
 - [`studio/`](https://github.com/OpenRootdev/sfx-tool/blob/main/studio/) · 音を聴いて調整するページ。
-- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · エージェント（またはあなた）が実行するコマンド。音、バリエーション、タイピング音トラックを作ります。
+- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · エージェント（またはあなた）が実行するコマンド。音、バリエーション、タイピング音トラックの作成、サウンドトラックのミックス、曲のテンポとキーの読み取り、動画の分析を行います。
 - [`src/`](https://github.com/OpenRootdev/sfx-tool/blob/main/src/) · 音のモデルとサンプル音。
 
 <sub>プレビュー画像は <a href="https://github.com/OpenRootdev/sfx-tool/tree/assets"><code>assets</code></a> ブランチ、翻訳は <a href="https://github.com/OpenRootdev/sfx-tool/tree/translations"><code>translations</code></a> ブランチにあります。<code>main</code> にはツール本体だけが入っています。</sub>

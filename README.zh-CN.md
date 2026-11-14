@@ -31,11 +31,12 @@
 - 描述一个声音（“更柔和”“更有木头感”“像真键盘一样”），智能体就会把它做出来，你不用写任何音频代码。
 - 一切实时更新：你或智能体修改时，波形、频谱和响度检查都会随之变化。
 - 在你的电脑上生成，无需账号、API 密钥或署名。自带 34 个示例音效（按键、敲击、气泡、提示音）作为起点。
+- 除了单个音效，第二个技能还教智能体为整段视频做声音设计：音乐、时机、留白和最终混音。它还能分析一段已完成的视频，或你喜欢其声音的视频，再为你的视频配上相称的声音。
 
 ## 快速开始
 
 1. 安装 <a href="https://nodejs.org">Node.js</a> 18 或更高版本。
-2. 把 <code>skill/</code> 文件夹复制到智能体的技能文件夹（Claude Code 为 <code>~/.claude/skills/sfx-tool</code>）。
+2. 把 <code>skill/</code> 文件夹复制到智能体的技能文件夹（Claude Code 为 <code>~/.claude/skills/sfx-tool</code>）。如需完整配乐，也把 <code>skills/sound-design/</code> 复制到同一位置。
 3. 在项目文件夹中打开终端，运行下面的命令。它会创建 <code>sfx/</code> 文件夹，并在浏览器中打开 Studio。
 4. 用平常的话告诉智能体，例如<i>“每打一个字加一声柔和的木质点击，一行结束时加一声轻柔的提示音。”</i>新声音会出现在 Studio 里，随时可以微调。
 
@@ -52,8 +53,9 @@ npx github:OpenRootdev/sfx-tool studio --open
 ## 包含内容
 
 - [`skill/SKILL.md`](https://github.com/OpenRootdev/sfx-tool/blob/main/skill/SKILL.md) · 智能体如何把描述变成声音，以及如何在 Studio 里与你配合。
+- [`skills/sound-design/`](https://github.com/OpenRootdev/sfx-tool/blob/main/skills/sound-design/) · 整段视频的声音设计：什么让声音显得专业，以及在各类视频中如何做到。
 - [`studio/`](https://github.com/OpenRootdev/sfx-tool/blob/main/studio/) · 试听和调整音效的页面。
-- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · 智能体（或你）运行的命令：生成声音、变体和打字音轨。
+- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · 智能体（或你）运行的命令：生成声音、变体和打字音轨，混合整条配乐，读取歌曲的速度和调性，或分析一段视频。
 - [`src/`](https://github.com/OpenRootdev/sfx-tool/blob/main/src/) · 声音模型和示例音效。
 
 <sub>预览素材在 <a href="https://github.com/OpenRootdev/sfx-tool/tree/assets"><code>assets</code></a> 分支，翻译在 <a href="https://github.com/OpenRootdev/sfx-tool/tree/translations"><code>translations</code></a> 分支，所以 <code>main</code> 只包含工具本身。</sub>

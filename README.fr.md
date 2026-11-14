@@ -31,11 +31,12 @@ Votre agent écrit chaque son sous forme d'un petit fichier recette, et le Studi
 - Décrivez un son (« plus doux », « plus boisé », « comme un vrai clavier ») et votre agent le construit ; vous n'écrivez jamais de code audio.
 - Tout est en direct : forme d'onde, spectre et contrôle du volume se mettent à jour quand vous ou l'agent modifiez.
 - Créé sur votre ordinateur, sans compte, clé d'API ni mention. 34 sons d'exemple (frappes, coups, bulles, carillons) servent de point de départ.
+- Au-delà des sons isolés, un second skill apprend à votre agent le sound design de vidéos entières : musique, timing, silence et mixage final. Il peut aussi étudier une vidéo terminée, ou une vidéo dont vous aimez le son, et sonoriser la vôtre dans le même esprit.
 
 ## Démarrer
 
 1. Installez <a href="https://nodejs.org">Node.js</a> 18 ou plus récent.
-2. Copiez le dossier <code>skill/</code> dans le dossier des skills de votre agent (pour Claude Code : <code>~/.claude/skills/sfx-tool</code>).
+2. Copiez le dossier <code>skill/</code> dans le dossier des skills de votre agent (pour Claude Code : <code>~/.claude/skills/sfx-tool</code>). Pour des bandes-son complètes, copiez aussi <code>skills/sound-design/</code> au même endroit.
 3. Ouvrez un terminal dans le dossier de votre projet et lancez la commande ci-dessous. Elle crée un dossier <code>sfx/</code> et ouvre le Studio dans votre navigateur.
 4. Demandez simplement à votre agent, par exemple <i>« Fais un petit clic boisé et doux pour chaque lettre tapée, et un carillon léger à la fin de la ligne. »</i> Les nouveaux sons apparaissent dans le Studio, prêts à être ajustés.
 
@@ -52,8 +53,9 @@ npx github:OpenRootdev/sfx-tool studio --open
 ## Contenu
 
 - [`skill/SKILL.md`](https://github.com/OpenRootdev/sfx-tool/blob/main/skill/SKILL.md) · Comment votre agent transforme une description en son et travaille avec vous dans le Studio.
+- [`skills/sound-design/`](https://github.com/OpenRootdev/sfx-tool/blob/main/skills/sound-design/) · Le sound design de vidéos entières : ce qui rend un son professionnel, et comment y arriver dans chaque type de vidéo.
 - [`studio/`](https://github.com/OpenRootdev/sfx-tool/blob/main/studio/) · La page où vous écoutez et façonnez les sons.
-- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · La commande que lance votre agent (ou vous) : créer des sons, des variantes et des pistes de frappe.
+- [`bin/sfx-tool.js`](https://github.com/OpenRootdev/sfx-tool/blob/main/bin/sfx-tool.js) · La commande que lance votre agent (ou vous) : créer des sons, des variantes et des pistes de frappe, mixer une bande-son, lire le tempo et la tonalité d'un morceau ou étudier une vidéo.
 - [`src/`](https://github.com/OpenRootdev/sfx-tool/blob/main/src/) · Les modèles de son et les sons d'exemple.
 
 <sub>Les images d'aperçu sont sur la branche <a href="https://github.com/OpenRootdev/sfx-tool/tree/assets"><code>assets</code></a> et les traductions sur <a href="https://github.com/OpenRootdev/sfx-tool/tree/translations"><code>translations</code></a> : <code>main</code> ne contient que l'outil.</sub>
