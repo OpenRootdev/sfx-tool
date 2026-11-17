@@ -23,10 +23,13 @@ const min = (a) => { let m = Infinity; for (const v of a) if (v < m) m = v; retu
 export function probe(file) {
   const j = JSON.parse(run("ffprobe", ["-v", "error", "-show_entries", "stream=codec_type,avg_frame_rate,r_frame_rate,width,height:format=duration", "-of", "json", file]).toString());
   const v = (j.streams || []).find((s) => s.codec_type === "video");
-  if (!v) throw new Error(`${file} has no video stream (for music alone use: sfx-tool analyse)`);
+  const hasAudio = (j.streams || []).some((s) => s.codec_type === "audio");
+  if (!v && !hasAudio) throw new Error(`${file} has no video or audio stream`);
+  // sound alone (a song, a voice, a soundtrack): no picture to read
+  if (!v) return { duration: +Number(j.format.duration).toFixed(3), fps: null, width: null, height: null, hasVideo: false, hasAudio };
   const rate = (s) => { const [a, b] = String(s || "0/1").split("/").map(Number); return b ? a / b : 0; };
   const fps = rate(v.avg_frame_rate) || rate(v.r_frame_rate) || 30;
-  return { duration: +Number(j.format.duration).toFixed(3), fps: +fps.toFixed(3), width: v.width, height: v.height, hasAudio: j.streams.some((s) => s.codec_type === "audio") };
+  return { duration: +Number(j.format.duration).toFixed(3), fps: +fps.toFixed(3), width: v.width, height: v.height, hasVideo: true, hasAudio };
 }
 
 // ---------- picture: frame-to-frame change on a 64×36 grey copy
@@ -218,7 +221,7 @@ function gridAt(grids, t) {
 }
 function alignment(pic, snd) {
   const res = {};
-  if (snd.beats) {
+  if (snd.beats && pic) {
     const beat = snd.tempo.beatSeconds, w = 0.04;
     const on = (ev, div) => Math.round(mean(ev.map((t) => (Math.abs(((t - gridAt(snd.grids, t).firstBar) / (beat / div) + 0.5) % 1 - 0.5) * beat / div <= w ? 1 : 0))) * 100);
     const row = (ev) => (ev.length ? { events: ev.length, beatPct: on(ev, 1), eighthPct: on(ev, 2), sixteenthPct: on(ev, 4) } : { events: 0 });
@@ -226,7 +229,7 @@ function alignment(pic, snd) {
     // within 40 ms of the grid, against what random times would score
     res.pictureOnGrid = { cutsAndPops: row([...pic.cuts, ...pic.pops].map((c) => c.t)), moves: row(pic.moves.map((m) => m.t)), chance: { beatPct: chance(1), eighthPct: chance(2), sixteenthPct: chance(4) } };
   }
-  const pictureEvents = [...pic.cuts.map((c) => ["cut", c.t]), ...pic.pops.map((c) => ["pop", c.t]), ...pic.moves.map((m) => ["move", m.t]), ...pic.holds.flatMap(([a, b]) => [["hold starts", a], ["hold ends", b]])];
+  const pictureEvents = pic ? [...pic.cuts.map((c) => ["cut", c.t]), ...pic.pops.map((c) => ["pop", c.t]), ...pic.moves.map((m) => ["move", m.t]), ...pic.holds.flatMap(([a, b]) => [["hold starts", a], ["hold ends", b]])] : [];
   const nearest = (t, list) => list.reduce((best, [k, v]) => (Math.abs(v - t) < Math.abs(best[1] - t) ? [k, v] : best), ["", Infinity]);
   const link = (kind, t) => {
     // bar lines only mean something inside a section the grid was fitted to
@@ -239,13 +242,14 @@ function alignment(pic, snd) {
 }
 
 export function spot(file, { fps } = {}) {
-  const p = probe(file), rate = Math.min(fps || p.fps, 60);
-  const pic = picture(file, rate);
+  const p = probe(file), rate = p.hasVideo ? Math.min(fps || p.fps, 60) : null;
+  const pic = p.hasVideo ? picture(file, rate) : null;
   const snd = p.hasAudio ? sound(file) : { silent: true, noTrack: true };
   return { file, ...p, analysedFps: rate, picture: pic, sound: snd, together: snd.silent ? null : alignment(pic, snd) };
 }
 
 export function events(s) {
+  if (!s.picture) return [];
   return [...s.picture.cuts.map((c) => ({ t: c.t, kind: "cut", strength: c.strength })), ...s.picture.pops.map((c) => ({ t: c.t, kind: "pop", strength: c.strength })), ...s.picture.moves.map((m) => ({ t: m.t, kind: "move", strength: m.strength })),
     ...s.picture.holds.flatMap(([a, b]) => [{ t: a, kind: "hold-start" }, { t: b, kind: "hold-end" }])].sort((a, b) => a.t - b.t);
 }
@@ -264,13 +268,16 @@ export function contactSheet(file, out, duration) {
 
 export function formatSpot(s) {
   const L = [], p = s.picture, d = s.sound, fmtT = (a) => a.map((v) => (typeof v === "number" ? v.toFixed(2) : v)).join(" ");
-  L.push(`${s.file}: ${s.duration} s, ${s.width}x${s.height} @ ${s.fps} fps, ${s.hasAudio ? "with sound" : "no audio track"}`);
+  if (!p) L.push(`${s.file}: ${s.duration} s, sound only`);
+  else L.push(`${s.file}: ${s.duration} s, ${s.width}x${s.height} @ ${s.fps} fps, ${s.hasAudio ? "with sound" : "no audio track"}`);
+  if (p) {
   L.push("picture");
   L.push(`  cuts (${p.cuts.length}): ${fmtT(p.cuts.map((c) => c.t)) || "none"}`);
   L.push(`  pops, part of the frame changes at once (${p.pops.length}): ${fmtT(p.pops.map((c) => c.t)) || "none"}`);
   L.push(`  moves (${p.moves.length}): ${fmtT(p.moves.map((m) => m.t)) || "none"}`);
   L.push(`  holds, still for 0.5 s or more (${p.holds.length}): ${p.holds.map(([a, b]) => `${a.toFixed(2)}-${b.toFixed(2)}`).join("  ") || "none"}`);
   L.push(`  motion per second: ${p.motionPerSecond.join(" ")}`);
+  }
   if (d.silent) { L.push(d.noTrack ? "sound: no audio track" : "sound: silent"); return L.join("\n"); }
   L.push("sound");
   L.push(`  ${d.lufs} LUFS, stereo width ${d.stereoWidth}%, ${d.tempo ? `${d.tempo.bpm} BPM (confidence ${d.tempo.confidence}; half or double is possible)` : "no steady tempo"}, ${d.key.key} (margin ${d.key.margin} over ${d.key.runnerUp})`);
@@ -291,7 +298,11 @@ export function formatSpot(s) {
     L.push("together (within 40 ms; random times would score " + `${c.beatPct}% / ${c.eighthPct}% / ${c.sixteenthPct}%)`);
     L.push(`  cuts and pops: ${fmtRow(g.cutsAndPops)}`);
     L.push(`  moves: ${fmtRow(g.moves)}`);
-  } else if (t?.sections?.length) L.push("together");
-  for (const x of t?.sections || []) L.push(`  ${x.sound} ${x.t.toFixed(2)} s: ${x.picture ? `nearest ${x.picture.kind} ${x.picture.t.toFixed(2)} (${x.picture.offsetMs > 0 ? "+" : ""}${x.picture.offsetMs} ms)` : "no picture event"}${x.barOffsetMs != null ? `, ${x.barOffsetMs > 0 ? "+" : ""}${x.barOffsetMs} ms from a bar line` : ""}`);
+  } else if (t?.sections?.length) L.push(p ? "together" : "sections");
+  for (const x of t?.sections || []) {
+    const bar = x.barOffsetMs != null ? `${x.barOffsetMs > 0 ? "+" : ""}${x.barOffsetMs} ms from a bar line` : "";
+    if (!p) { L.push(`  ${x.sound} ${x.t.toFixed(2)} s${bar ? `: ${bar}` : ""}`); continue; }
+    L.push(`  ${x.sound} ${x.t.toFixed(2)} s: ${x.picture ? `nearest ${x.picture.kind} ${x.picture.t.toFixed(2)} (${x.picture.offsetMs > 0 ? "+" : ""}${x.picture.offsetMs} ms)` : "no picture event"}${bar ? `, ${bar}` : ""}`);
+  }
   return L.join("\n");
 }

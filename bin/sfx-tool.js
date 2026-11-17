@@ -39,10 +39,11 @@ Sound design (see skills/sound-design):
                                                  reverb, swells, loudness-matched master (default -14 LUFS)
   sfx-tool analyse <music file> [--fps 30] [--beats-out beats.json]
                                                  tempo, beat grid, key, notes that fit, loudness, energy per second
-  sfx-tool spot <video> [--report spot.json] [--events-out events.json] [--sheet sheet.png] [--fps 30] [--json]
+  sfx-tool spot <video|sound> [--report spot.json] [--events-out events.json] [--sheet sheet.png] [--fps 30] [--json]
                                                  a finished or reference video: cuts, moves and holds in the picture;
                                                  its soundtrack's bands, breaks, entries, tempo, groove and key;
-                                                 how the two line up (needs ffmpeg and ffprobe)
+                                                 how the two line up (needs ffmpeg and ffprobe). A sound file alone
+                                                 (a song, a soundtrack) gets the sound part and its sections
   Note names work anywhere a pitch is set: --set pitch=E5
 `;
 
@@ -241,14 +242,15 @@ async function main() {
   }
 
   if (cmd === "spot") {
-    if (!pos[0]) throw new Error("give a video: sfx-tool spot video.mp4");
+    if (!pos[0]) throw new Error("give a video or a sound file: sfx-tool spot video.mp4");
     const { spot, formatSpot, events, contactSheet } = await import("../src/spot.js");
     const s = spot(path.resolve(pos[0]), { fps: opt.fps === undefined ? undefined : num(opt.fps, 30) });
     s.file = pos[0];
     if (opt.report) fs.writeFileSync(opt.report, JSON.stringify(s, null, 1));
     if (opt["events-out"]) fs.writeFileSync(opt["events-out"], JSON.stringify(events(s), null, 1));
     let sheet = null;
-    if (opt.sheet) sheet = contactSheet(path.resolve(pos[0]), path.resolve(opt.sheet), s.duration);
+    if (opt.sheet && !s.hasVideo) console.error("no picture, so no contact sheet");
+    else if (opt.sheet) sheet = contactSheet(path.resolve(pos[0]), path.resolve(opt.sheet), s.duration);
     if (opt.json) return console.log(JSON.stringify(s, null, 1));
     console.log(formatSpot(s));
     if (sheet) console.log(`contact sheet: ${opt.sheet}, one frame every ${sheet.step} s${sheet.labelled ? "" : " (no time labels: this ffmpeg has no drawtext)"}`);

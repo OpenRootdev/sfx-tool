@@ -141,7 +141,7 @@ or `node bin/sfx-tool.js <command>` in a clone. Any other DAW, library or tool w
 | Tempo, beat grid, key, notes for SFX, energy per second | `sfx-tool analyse <music>` (estimates: half/double tempo is possible; relative major/minor share notes) |
 | Small tuned SFX: taps, thocks, knocks, pops, chimes | `sfx-tool new` / Studio (`sfx-tool studio --open`); the `sfx-tool` skill |
 | Typing / text-appear tracks | `typing` clips in the plan, or `sfx-tool track` |
-| A finished or reference video: cuts, moves, holds; its soundtrack's bands, breaks, tempo, groove; how they line up | `sfx-tool spot video.mp4 --sheet sheet.png --events-out events.json` (needs ffmpeg) |
+| A finished or reference video: cuts, moves, holds; its soundtrack's bands, breaks, tempo, groove; how they line up. A song or soundtrack alone: its sections against bar lines | `sfx-tool spot video.mp4 --sheet sheet.png --events-out events.json`, or `sfx-tool spot song.mp3` (needs ffmpeg) |
 | Mix: clips, automation, filters, ducking and voice pockets, reverb, swells, loudness | `sfx-tool mix plan.json -o mix.wav` |
 | Stems (drums, bass, vocals, other) from any song | Demucs, local and free: `python -m demucs -n htdemucs song.mp3` |
 | Music bed when none is supplied | a licensed library track, the user's own, or local generation (MusicGen); check the licence |

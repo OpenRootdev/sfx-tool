@@ -1,6 +1,6 @@
 {
   "name": "sfx-tool",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A sound effects workspace for AI agents: your agent makes the sounds, you hear and shape them in a local Studio, then export WAVs, typing tracks or a whole mixed soundtrack.",
   "type": "module",
   "bin": {
